@@ -2,8 +2,8 @@
 #include <stdlib.h>
 
 
-#define set_color(A, B, C) {*(colors * (A) + (B)) = C;}
-#define get_color(A, B) *(colors * (A) + (B))
+#define set_color(A, B, C) {*(colors + t_l * (A) + (B)) = C;}
+#define get_color(A, B) *(colors + t_l * (A) + (B))
 
 
 /* Estruturas para conjuntos disjuntos */
@@ -32,17 +32,38 @@ VERTEX_SET *Find_Set(VERTEX_SET *x);
 void Union(VERTEX_SET *x, VERTEX_SET *y);
 void Link(VERTEX_SET *x, VERTEX_SET *y);
 
-void Kruskal(EDGE *edges, int size_graph, int size_edges);
+void Kruskal(int size_edges);
+
+void merge_sort(int l, int r);
+void merge(int l, int m, int r);
+int less(EDGE a, EDGE b);
+
+void printColors();
 
 
 
 char *colors;
-int sum = 0, black = 0, white = 0;
+int sum = 0, black = 0, white = 0, lines, columns;
+EDGE *edges, *edges_aux;
+VERTEX_SET *graph;
 
 
 int main(){
 	
+	int i, j;
 
+	graph = (VERTEX_SET*)malloc(sizeof(VERTEX_SET) * m * n);
+
+	scanf("%d %d", &lines, &columns);
+
+	colors = (char*)malloc(sizeof(char) * m * n);
+
+	for(i = 0; i < lines; i++){
+		for(j = 0; j < columns; j++){
+
+			scanf("%d ", ->)
+		}
+	}
 
 	return 0;
 }
@@ -85,10 +106,10 @@ void Link(VERTEX_SET *x, VERTEX_SET *y){
 |                                              |
  \********************************************/
 
-void Kruskal(EDGE *edges, int size_graph, int size_edges){
+void Kruskal(int size_edges){
 	VERTEX_SET *A = NULL;
 
-	//merge_sort(edges);
+	merge_sort(0, size_edges - 1);
 
 	int i = 0;
 
@@ -99,7 +120,10 @@ void Kruskal(EDGE *edges, int size_graph, int size_edges){
 
 				/*Color vertexes of known edge*/
 				edges[i].origin->color = edges[i].color_origin;
+				set_color(edges[i].origin->x, edges[i].origin->y, edges[i].color_origin);
+
 				edges[i].dest->color = edges[i].color_dest;
+				set_color(edges[i].dest->x, edges[i].dest->y, edges[i].color_dest);
 
 				black += (edges[i].color_origin == 'P') + (edges[i].color_dest == 'P');
 				white += (edges[i].color_origin == 'C') + (edges[i].color_dest == 'C');
@@ -110,6 +134,79 @@ void Kruskal(EDGE *edges, int size_graph, int size_edges){
 					sum += edges[i].con_value;
 				}
 			}
+		}
+	}
+}
+
+
+ /********************************************\
+|                                              |
+|                  Merge Sort                  |
+|                                              |
+ \********************************************/
+
+void merge_sort(int l, int r){
+	int m = (r + l) / 2;
+
+	if (r <= l) 
+		return;
+
+	merge_sort(l, m);
+	merge_sort(m + 1, r);
+	merge(l, m, r);
+}
+
+void merge(int l, int m, int r){
+	int i, j, k;
+
+	for(i = m + 1; i > l; i--) {
+		edges_aux[i - 1] = edges[i - 1];
+	}
+
+	for(j = m; j < r; j++) {
+		edges_aux[r + m - j] = edges[j + 1];
+	}
+
+	for(k = l; k <= r; k++) {
+		if(less(edges_aux[j], edges_aux[i])) {
+    		edges[k] = edges_aux[j--];
+		}
+		else {
+			edges[k] = edges_aux[i++];
+		}
+	}
+}
+
+int less(EDGE a, EDGE b){
+	if(a.value <= b.value){
+		if(a.value == b.value){
+			int a_black_count = (a.color_origin == 'P') + (a.color_dest == 'P');
+			int b_black_count = (b.color_origin == 'P') + (b.color_origin == 'P');
+
+			if(b_black_count < a_black_count){
+				return 0;
+			}
+		}
+
+		return 1;
+	}
+
+	return 0;
+}
+
+
+ /********************************************\
+|                                              |
+|                    Colors                    |
+|                                              |
+ \********************************************/
+
+void printColors(int ){
+	int i, j;
+
+	for(i = 0; i < lines; i++){
+		for(j = 0; j < lines; j++){
+			
 		}
 	}
 }
