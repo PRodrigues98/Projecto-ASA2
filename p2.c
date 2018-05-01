@@ -4,28 +4,28 @@
 
 #define SOURCE_X -2
 #define SOURCE_Y -2
-#define SINK_X -2
-#define SINK_Y -2
+#define SINK_X -1
+#define SINK_Y -1
 
 
-/* Estruturas para conjuntos disjuntos */
 typedef struct vertex VERTEX;
 typedef struct edge EDGE;
+typedef struct stack STACK;
 typedef struct queue QUEUE;
+typedef struct queue_elem QUEUE_ELEM;
 
 
-typedef struct queue {
+typedef struct stack {
 	EDGE *edge;
-	QUEUE *prev;
-	QUEUE *next;
-} QUEUE;
+	STACK *next;
+} STACK;
 
 typedef struct vertex {
 	EDGE *pred;
 
 	int bfs_count;
 
-	QUEUE *edges;
+	STACK *edges;
 } VERTEX;
 
 typedef struct edge {
@@ -40,9 +40,11 @@ typedef struct edge {
 
 
 
+void edmondsKarp();
 int bfs();
-QUEUE* enqueue(EDGE *e, QUEUE *q);
-QUEUE* enqueueQ(QUEUE *e, QUEUE *q);
+
+STACK* push(EDGE *e, STACK *q);
+
 void printColors();
 
 
@@ -83,37 +85,39 @@ int main(){
 		for(j = 0; j < columns; j++){
 			scanf("%d ", &tmp);
 
-			graph[i * lines + j].bfs_count = 0;
-			graph[i * lines + j].pred = NULL;
-			graph[i * lines + j].edges = NULL;
+			graph[i * columns + j].bfs_count = 0;
+			graph[i * columns + j].pred = NULL;
+			graph[i * columns + j].edges = NULL;
 
-			if(tmp_P_values[i * lines + j] != tmp){
+			if(tmp_P_values[i * columns + j] != tmp){
 				EDGE e;
 
-				if(tmp_P_values[i * lines + j] > tmp){
+				if(tmp_P_values[i * columns + j] > tmp){
 					e.origin_x = SOURCE_X;
 					e.origin_y = SOURCE_Y;
 
-					e.dest_x = j;
-					e.dest_y = i;
+					e.dest_x = i;
+					e.dest_y = j;
 
 					e.flux = tmp;
-					e.cap_res = tmp_P_values[i * lines + j] - tmp;
+					e.cap_res = tmp_P_values[i * columns + j] - tmp;
+
+					source.edges = push(&e, source.edges);
 				}
-				else if(tmp > tmp_P_values[i * lines + j]){
-					e.origin_x = j;
-					e.origin_y = i;
+				else if(tmp > tmp_P_values[i * columns + j]){
+					e.origin_x = i;
+					e.origin_y = j;
 
 					e.dest_x = SINK_X;
 					e.dest_y = SINK_Y;
 
-					e.flux = tmp_P_values[i * lines + j];
-					e.cap_res = tmp - tmp_P_values[i * lines + j];
+					e.flux = tmp_P_values[i * columns + j];
+					e.cap_res = tmp - tmp_P_values[i * columns + j];
+
+					sink.edges = push(&e, sink.edges);
 				}
 
-
-				source.edges = enqueue(&e, source.edges);
-				graph[i * lines + j].edges = enqueue(&e, graph[i * lines + j].edges);
+				graph[i * columns + j].edges = push(&e, graph[i * columns + j].edges);
 
 				flow += e.flux;
 			}
@@ -138,35 +142,37 @@ int main(){
 			if(tmp != 0){
 				EDGE e1, e2;
 
-				e1.origin_x = j;
-				e1.origin_y = i;
+				e1.origin_x = i;
+				e1.origin_y = j;
 
-				e1.dest_x = j + 1;
-				e1.dest_y = i;
+				e1.dest_x = i;
+				e1.dest_y = j + 1;
 
 				e1.flux = 0;
 				e1.cap_res = tmp;
 
 
-				e2.origin_x = j + 1;
-				e2.origin_y = i;
+				e2.origin_x = i;
+				e2.origin_y = j + 1;
 
-				e2.dest_x = j;
-				e2.dest_y = i;
+				e2.dest_x = i;
+				e2.dest_y = j;
 
 				e2.flux = 0;
 				e2.cap_res = tmp;
 
-				graph[i * lines + j].edges = enqueue(&e1, graph[i * lines + j].edges);
-				graph[i * lines + j].edges = enqueue(&e2, graph[i * lines + j].edges);
+				graph[i * columns + j].edges = push(&e1, graph[i * columns + j].edges);
+				graph[i * columns + j].edges = push(&e2, graph[i * columns + j].edges);
 
-				graph[i * lines + j + 1].edges = enqueue(&e1, graph[i * lines + j + 1].edges);
-				graph[i * lines + j + 1].edges = enqueue(&e2, graph[i * lines + j + 1].edges);
+				graph[i * columns + j + 1].edges = push(&e1, graph[i * columns + j + 1].edges);
+				graph[i * columns + j + 1].edges = push(&e2, graph[i * columns + j + 1].edges);
 			}
 		}
 
 		scanf("\n");
 	}
+	
+	printf("\n");
 
 
 	for(i = 0; i < lines - 1; i++){
@@ -176,40 +182,46 @@ int main(){
 			if(tmp != 0){
 				EDGE e1, e2;
 
-				e1.origin_x = j;
-				e1.origin_y = i;
+				e1.origin_x = i;
+				e1.origin_y = j;
 
-				e1.dest_x = j;
-				e1.dest_y = i + 1;
+				e1.dest_x = i + 1;
+				e1.dest_y = j;
 
 				e1.flux = 0;
 				e1.cap_res = tmp;
 
 
-				e2.origin_x = j;
-				e2.origin_y = i + 1;
+				e2.origin_x = i + 1;
+				e2.origin_y = j;
 
-				e2.dest_x = j;
-				e2.dest_y = i;
+				e2.dest_x = i;
+				e2.dest_y = j;
 
 				e2.flux = 0;
 				e2.cap_res = tmp;
 
-				graph[i * lines + j].edges = enqueue(&e1, graph[i * lines + j].edges);
-				graph[i * lines + j].edges = enqueue(&e2, graph[i * lines + j].edges);
+				graph[i * columns + j].edges = push(&e1, graph[i * columns + j].edges);
+				graph[i * columns + j].edges = push(&e2, graph[i * columns + j].edges);
 
-				graph[(i + 1) * lines + j].edges = enqueue(&e1, graph[(i + 1) * lines + j].edges);
-				graph[(i + 1) * lines + j].edges = enqueue(&e2, graph[(i + 1) * lines + j].edges);
+				graph[(i + 1) * columns + j].edges = push(&e1, graph[(i + 1) * columns + j].edges);
+				graph[(i + 1) * columns + j].edges = push(&e2, graph[(i + 1) * columns + j].edges);
 			}
 		}
 
 		scanf("\n");
 	}
 
+	edmondsKarp();
 
+	printf("%d\n\n", flow);
+
+	printColors();
 
 	return 0;
 }
+
+
 
 
 
@@ -219,17 +231,102 @@ int main(){
 |                                              |
  \********************************************/
 
+void edmondsKarp(){
+	EDGE *e;
+	STACK *s, *tmp;
+	VERTEX *u;
+	int minCapRes;
+	int cur_x, cur_y;
 
 
-/*typedef struct edge {
-	int origin_x, origin_y;
-	int dest_x, dest_y;
+	while(bfs() != 0){
 
-	/* flux denotes a backwards edge */
-	/*int flux;
-	/* cap_res denotes a forwards edge */
-	/*int cap_res;
-} EDGE;*/
+		e = sink.pred;
+
+		u = &graph[e->origin_x * lines + e->origin_y];
+
+		cur_x = e->origin_x;
+		cur_y = e->origin_y;
+
+		minCapRes = e->cap_res;
+
+		s = push(e, s);
+
+		e = u->pred;
+		s = push(e, s);
+
+		while(e->origin_x != SOURCE_X){
+
+			/* go to origin */
+			if(e->dest_x == cur_x && e->dest_y == cur_y){
+				if(e->cap_res < minCapRes){
+					minCapRes = e->cap_res;
+				}
+
+				u = &graph[e->origin_x * lines + e->origin_y];
+
+				cur_x = e->origin_x;
+				cur_y = e->origin_y;
+			}
+			/* go to destination */
+			else{ 
+				if(e->flux < minCapRes){
+					minCapRes = e->flux;
+				}
+
+				u = &graph[e->dest_x * lines + e->dest_y];
+
+				cur_x = e->dest_x;
+				cur_y = e->dest_y;
+			}
+
+			e = u->pred;
+			s = push(e, s);
+		}
+
+
+		e = s->edge;
+
+		e->cap_res -= minCapRes;
+		e->flux += minCapRes;
+
+		cur_x = e->dest_x;
+		cur_y = e->dest_y;
+
+		tmp = s;
+		s = s->next;
+		free(tmp);
+
+
+		while(s != NULL){
+			
+			e = s->edge;
+
+			/* edge from origin to destination */
+			if(e->origin_x == cur_x && e->origin_y == cur_y){
+				e->cap_res -= minCapRes;
+				e->flux += minCapRes;
+
+				cur_x = e->dest_x;
+				cur_y = e->dest_y;
+			}
+			/* edge from destination to origin */
+			else{
+				e->cap_res += minCapRes;
+				e->flux -= minCapRes;
+
+				cur_x = e->origin_x;
+				cur_y = e->origin_y;
+			}
+			
+			flow += minCapRes;
+
+			tmp = s;
+			s = s->next;
+			free(tmp);
+		}
+	}
+}
 
 
 
@@ -242,64 +339,102 @@ int main(){
 int bfs(){
 	bfs_count++;
 
-	QUEUE *Q = source.edges;
+	int *q = (int*)malloc(sizeof(int));
+
+	int beg = 0, end = 0;
+
+	q[end++] = SOURCE_X;
 
 	source.bfs_count = bfs_count;
 
-	EDGE *tmp;
-	VERTEX *v;
+	EDGE *e;
+	VERTEX *v, *u;
+	STACK *s;
 
-	while(Q != NULL && Q->edge->dest_x != SINK_X){
-		tmp = Q->edge;
+	while(beg < end){
 
-		/* Forwards */
-		if(tmp->cap_res > 0){
-			v = &graph[tmp->dest_x * lines + tmp->dest_y];
+		if(q[beg] == SOURCE_X){
+			u = &source;
+		}
+		else if(q[beg] == SINK_X){
+			u = &sink; /* Not supposed to be possible */
+		}
+		else{
+			u = &graph[q[beg]];
 		}
 
-		/* Backwards */
-		if(tmp->flux > 0){
-			v = &graph[tmp->origin_x * lines + tmp->origin_y];
+		s = u->edges;
+
+		while(s != NULL){
+
+			e = s->edge;
+
+			printf("%d:  %d %d -> %d %d\n", q[beg], e->origin_x, e->origin_y, e->dest_x, e->dest_y);
+			fflush(stdout);
+
+			if(e->dest_x == SINK_X){
+
+				sink.pred = e;
+
+				free(q);
+
+				return 1;
+			}
+
+			if(e->origin_x == (int)(q[beg] / columns) && e->origin_y == (int)(q[beg] / columns)){
+
+				/* Forwards */
+				if(v->bfs_count != bfs_count && e->cap_res > 0){
+
+					v = &graph[e->dest_x * columns + e->dest_y];
+
+					q[end++] = e->dest_x * columns + e->dest_y;
+	
+					v->bfs_count = bfs_count;
+					v->pred = e;
+				}
+			}
+			else if(e->origin_x != SOURCE_X){
+
+				/* Backwards */
+				if(v->bfs_count != bfs_count && e->flux > 0){
+
+					v = &graph[e->origin_x * columns + e->origin_y];
+
+					q[end++] = e->origin_x * columns + e->origin_y;
+
+					v->bfs_count = bfs_count;
+					v->pred = e;
+				}
+			}
+
+			s = s->next;
 		}
 
-		Q = Q->next;
-
-
+		beg++;
 	}
+
+	free(q);
+
+	return 0;
 }
 
 
 
  /********************************************\
 |                                              |
-|               Queue Operations               |
+|               Stack Operations               |
 |                                              |
  \********************************************/
 
-QUEUE* enqueue(EDGE *e, QUEUE *q){
+STACK* push(EDGE *e, STACK *q){
 
-	QUEUE *tmp = (QUEUE*)malloc(sizeof(QUEUE));
+	STACK *tmp = (STACK*)malloc(sizeof(STACK));
 
 	tmp->edge = e;
-	tmp->next = NULL;
-	tmp->prev = NULL;
+	tmp->next = q;
 
-	return enqueueQ(tmp, q);
-}
-
-QUEUE* enqueueQ(QUEUE *e, QUEUE *q){
-
-	if(q != NULL){
-		if(q->prev != NULL){
-			q->prev->next = e;
-		}
-
-		q->prev = e->prev;
-
-		return q;
-	}
-
-	return e;
+	return tmp;
 }
 
 
@@ -315,8 +450,14 @@ void printColors(){
 
 	for(i = 0; i < lines; i++){
 		for(j = 0; j < columns; j++){
-			
+			if(graph[i * columns + j].bfs_count != bfs_count){
+				printf("%c ", 'P');
+			}
+			else{
+				printf("%c ", 'C');
+			}
 		}
+		printf("\n");
 	}
 }
 
