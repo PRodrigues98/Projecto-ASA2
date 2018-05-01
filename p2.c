@@ -2,197 +2,306 @@
 #include <stdlib.h>
 
 
-#define set_color(A, B, C) {*(colors + t_l * (A) + (B)) = C;}
-#define get_color(A, B) *(colors + t_l * (A) + (B))
+#define SOURCE_X -2
+#define SOURCE_Y -2
+#define SINK_X -2
+#define SINK_Y -2
 
 
 /* Estruturas para conjuntos disjuntos */
-typedef struct set VERTEX_SET;
+typedef struct vertex VERTEX;
 typedef struct edge EDGE;
+typedef struct queue QUEUE;
 
-typedef struct set {
-	int x, y;
-	int rank;
-	int P_value, C_value;
-	char color;
-	VERTEX_SET *p;
-} VERTEX_SET;
+
+typedef struct queue {
+	EDGE *edge;
+	QUEUE *prev;
+	QUEUE *next;
+} QUEUE;
+
+typedef struct vertex {
+	EDGE *pred;
+
+	int bfs_count;
+
+	QUEUE *edges;
+} VERTEX;
 
 typedef struct edge {
-	int value;
-	int con_value;
-	char color_origin, color_dest;
-	VERTEX_SET *origin;
-	VERTEX_SET *dest;
+	int origin_x, origin_y;
+	int dest_x, dest_y;
+
+	/* flux denotes a backwards edge */
+	int flux;
+	/* cap_res denotes a forwards edge */
+	int cap_res;
 } EDGE;
 
 
 
-VERTEX_SET *Find_Set(VERTEX_SET *x);
-void Union(VERTEX_SET *x, VERTEX_SET *y);
-void Link(VERTEX_SET *x, VERTEX_SET *y);
-
-void Kruskal(int size_edges);
-
-void merge_sort(int l, int r);
-void merge(int l, int m, int r);
-int less(EDGE a, EDGE b);
-
+int bfs();
+QUEUE* enqueue(EDGE *e, QUEUE *q);
+QUEUE* enqueueQ(QUEUE *e, QUEUE *q);
 void printColors();
 
 
 
-char *colors;
-int sum = 0, black = 0, white = 0, lines, columns;
-EDGE *edges, *edges_aux;
-VERTEX_SET *graph;
+int flow = 0, lines, columns, bfs_count = 0;
+VERTEX source, sink;
+VERTEX *graph;
+
 
 
 int main(){
 	
-	int i, j;
+	int i, j, tmp;
 
-	graph = (VERTEX_SET*)malloc(sizeof(VERTEX_SET) * m * n);
+	scanf("%d %d\n", &lines, &columns);
 
-	scanf("%d %d", &lines, &columns);
+	graph = (VERTEX*)malloc(sizeof(VERTEX) * lines * columns);
 
-	colors = (char*)malloc(sizeof(char) * m * n);
+	int *tmp_P_values = (int*)malloc(sizeof(int) * lines * columns);
 
 	for(i = 0; i < lines; i++){
 		for(j = 0; j < columns; j++){
-
-			scanf("%d ", ->)
+			scanf("%d ", &tmp_P_values[i * columns + j]);
 		}
+
+		scanf("\n");
 	}
 
-	return 0;
-}
+
+	source.pred = NULL;
+	source.edges = NULL;
+
+	sink.pred = NULL;
+	sink.edges = NULL;
 
 
- /********************************************\
-|                                              |
-|           Operacoes sobre conjuntos          |
-|                                              |
- \********************************************/
+	for(i = 0; i < lines; i++){
+		for(j = 0; j < columns; j++){
+			scanf("%d ", &tmp);
 
-VERTEX_SET *Find_Set(VERTEX_SET *x){
-	if(x != x->p){
-		x->p = Find_Set(x->p);
-	}
+			graph[i * lines + j].bfs_count = 0;
+			graph[i * lines + j].pred = NULL;
+			graph[i * lines + j].edges = NULL;
 
-	return x->p;
-}
+			if(tmp_P_values[i * lines + j] != tmp){
+				EDGE e;
 
-void Union(VERTEX_SET *x, VERTEX_SET *y){
-	Link(Find_Set(x), Find_Set(y));
-}
+				if(tmp_P_values[i * lines + j] > tmp){
+					e.origin_x = SOURCE_X;
+					e.origin_y = SOURCE_Y;
 
-void Link(VERTEX_SET *x, VERTEX_SET *y){
-	if(x->rank > y->rank){
-		y->p = x;
-	}
-	else{
-		x->p = y;
-		if(x->rank == y->rank){
-			y->rank++;
-		}
-	}
-}
+					e.dest_x = j;
+					e.dest_y = i;
 
-
- /********************************************\
-|                                              |
-|              Algoritmo de Kruskal            |
-|                                              |
- \********************************************/
-
-void Kruskal(int size_edges){
-	VERTEX_SET *A = NULL;
-
-	merge_sort(0, size_edges - 1);
-
-	int i = 0;
-
-	while(black + white < size_graph){
-		if((edges[i].color_origin == edges[i].origin->color || edges[i].origin->color == -1) && (edges[i].color_dest == edges[i].dest->color || edges[i].dest->color == -1)){
-			if(Find_Set(edges[i].origin) != Find_Set(edges[i].dest)){
-				Union(edges[i].origin, edges[i].dest);
-
-				/*Color vertexes of known edge*/
-				edges[i].origin->color = edges[i].color_origin;
-				set_color(edges[i].origin->x, edges[i].origin->y, edges[i].color_origin);
-
-				edges[i].dest->color = edges[i].color_dest;
-				set_color(edges[i].dest->x, edges[i].dest->y, edges[i].color_dest);
-
-				black += (edges[i].color_origin == 'P') + (edges[i].color_dest == 'P');
-				white += (edges[i].color_origin == 'C') + (edges[i].color_dest == 'C');
-
-				sum += (edges[i].color_origin == 'P') * edges[i].origin->P_value + (edges[i].color_origin == 'C') * edges[i].origin->C_value + (edges[i].color_dest == 'P') * edges[i].dest->P_value + (edges[i].color_dest == 'C') * edges[i].dest->C_value;
-
-				if(edges[i].color_origin != edges[i].color_dest){
-					sum += edges[i].con_value;
+					e.flux = tmp;
+					e.cap_res = tmp_P_values[i * lines + j] - tmp;
 				}
+				else if(tmp > tmp_P_values[i * lines + j]){
+					e.origin_x = j;
+					e.origin_y = i;
+
+					e.dest_x = SINK_X;
+					e.dest_y = SINK_Y;
+
+					e.flux = tmp_P_values[i * lines + j];
+					e.cap_res = tmp - tmp_P_values[i * lines + j];
+				}
+
+
+				source.edges = enqueue(&e, source.edges);
+				graph[i * lines + j].edges = enqueue(&e, graph[i * lines + j].edges);
+
+				flow += e.flux;
+			}
+			else{
+				flow += tmp;
 			}
 		}
+
+		scanf("\n");
 	}
+
+	scanf("\n");
+
+
+	free(tmp_P_values);
+
+
+	for(i = 0; i < lines; i++){
+		for(j = 0; j < columns - 1; j++){
+			scanf("%d ", &tmp);
+
+			if(tmp != 0){
+				EDGE e1, e2;
+
+				e1.origin_x = j;
+				e1.origin_y = i;
+
+				e1.dest_x = j + 1;
+				e1.dest_y = i;
+
+				e1.flux = 0;
+				e1.cap_res = tmp;
+
+
+				e2.origin_x = j + 1;
+				e2.origin_y = i;
+
+				e2.dest_x = j;
+				e2.dest_y = i;
+
+				e2.flux = 0;
+				e2.cap_res = tmp;
+
+				graph[i * lines + j].edges = enqueue(&e1, graph[i * lines + j].edges);
+				graph[i * lines + j].edges = enqueue(&e2, graph[i * lines + j].edges);
+
+				graph[i * lines + j + 1].edges = enqueue(&e1, graph[i * lines + j + 1].edges);
+				graph[i * lines + j + 1].edges = enqueue(&e2, graph[i * lines + j + 1].edges);
+			}
+		}
+
+		scanf("\n");
+	}
+
+
+	for(i = 0; i < lines - 1; i++){
+		for(j = 0; j < columns; j++){
+			scanf("%d ", &tmp);
+
+			if(tmp != 0){
+				EDGE e1, e2;
+
+				e1.origin_x = j;
+				e1.origin_y = i;
+
+				e1.dest_x = j;
+				e1.dest_y = i + 1;
+
+				e1.flux = 0;
+				e1.cap_res = tmp;
+
+
+				e2.origin_x = j;
+				e2.origin_y = i + 1;
+
+				e2.dest_x = j;
+				e2.dest_y = i;
+
+				e2.flux = 0;
+				e2.cap_res = tmp;
+
+				graph[i * lines + j].edges = enqueue(&e1, graph[i * lines + j].edges);
+				graph[i * lines + j].edges = enqueue(&e2, graph[i * lines + j].edges);
+
+				graph[(i + 1) * lines + j].edges = enqueue(&e1, graph[(i + 1) * lines + j].edges);
+				graph[(i + 1) * lines + j].edges = enqueue(&e2, graph[(i + 1) * lines + j].edges);
+			}
+		}
+
+		scanf("\n");
+	}
+
+
+
+	return 0;
 }
+
 
 
  /********************************************\
 |                                              |
-|                  Merge Sort                  |
+|                 Edmonds-Karp                 |
 |                                              |
  \********************************************/
 
-void merge_sort(int l, int r){
-	int m = (r + l) / 2;
 
-	if (r <= l) 
-		return;
 
-	merge_sort(l, m);
-	merge_sort(m + 1, r);
-	merge(l, m, r);
-}
+/*typedef struct edge {
+	int origin_x, origin_y;
+	int dest_x, dest_y;
 
-void merge(int l, int m, int r){
-	int i, j, k;
+	/* flux denotes a backwards edge */
+	/*int flux;
+	/* cap_res denotes a forwards edge */
+	/*int cap_res;
+} EDGE;*/
 
-	for(i = m + 1; i > l; i--) {
-		edges_aux[i - 1] = edges[i - 1];
-	}
 
-	for(j = m; j < r; j++) {
-		edges_aux[r + m - j] = edges[j + 1];
-	}
 
-	for(k = l; k <= r; k++) {
-		if(less(edges_aux[j], edges_aux[i])) {
-    		edges[k] = edges_aux[j--];
-		}
-		else {
-			edges[k] = edges_aux[i++];
-		}
-	}
-}
+ /********************************************\
+|                                              |
+|             Breadth-First Search             |
+|                                              |
+ \********************************************/
 
-int less(EDGE a, EDGE b){
-	if(a.value <= b.value){
-		if(a.value == b.value){
-			int a_black_count = (a.color_origin == 'P') + (a.color_dest == 'P');
-			int b_black_count = (b.color_origin == 'P') + (b.color_origin == 'P');
+int bfs(){
+	bfs_count++;
 
-			if(b_black_count < a_black_count){
-				return 0;
-			}
+	QUEUE *Q = source.edges;
+
+	source.bfs_count = bfs_count;
+
+	EDGE *tmp;
+	VERTEX *v;
+
+	while(Q != NULL && Q->edge->dest_x != SINK_X){
+		tmp = Q->edge;
+
+		/* Forwards */
+		if(tmp->cap_res > 0){
+			v = &graph[tmp->dest_x * lines + tmp->dest_y];
 		}
 
-		return 1;
+		/* Backwards */
+		if(tmp->flux > 0){
+			v = &graph[tmp->origin_x * lines + tmp->origin_y];
+		}
+
+		Q = Q->next;
+
+
+	}
+}
+
+
+
+ /********************************************\
+|                                              |
+|               Queue Operations               |
+|                                              |
+ \********************************************/
+
+QUEUE* enqueue(EDGE *e, QUEUE *q){
+
+	QUEUE *tmp = (QUEUE*)malloc(sizeof(QUEUE));
+
+	tmp->edge = e;
+	tmp->next = NULL;
+	tmp->prev = NULL;
+
+	return enqueueQ(tmp, q);
+}
+
+QUEUE* enqueueQ(QUEUE *e, QUEUE *q){
+
+	if(q != NULL){
+		if(q->prev != NULL){
+			q->prev->next = e;
+		}
+
+		q->prev = e->prev;
+
+		return q;
 	}
 
-	return 0;
+	return e;
 }
+
 
 
  /********************************************\
@@ -201,12 +310,13 @@ int less(EDGE a, EDGE b){
 |                                              |
  \********************************************/
 
-void printColors(int ){
+void printColors(){
 	int i, j;
 
 	for(i = 0; i < lines; i++){
-		for(j = 0; j < lines; j++){
+		for(j = 0; j < columns; j++){
 			
 		}
 	}
 }
+
