@@ -58,6 +58,7 @@ VERTEX *graph;
 int main(){
 	
 	int i, j, tmp;
+	EDGE *e1, *e2;
 
 	scanf("%d %d\n", &lines, &columns);
 
@@ -76,9 +77,11 @@ int main(){
 
 	source.pred = NULL;
 	source.edges = NULL;
+	source.bfs_count = 0;
 
 	sink.pred = NULL;
 	sink.edges = NULL;
+	source.bfs_count = 0;
 
 
 	for(i = 0; i < lines; i++){
@@ -90,36 +93,37 @@ int main(){
 			graph[i * columns + j].edges = NULL;
 
 			if(tmp_P_values[i * columns + j] != tmp){
-				EDGE e;
+
+				e1 = (EDGE*)malloc(sizeof(EDGE));
 
 				if(tmp_P_values[i * columns + j] > tmp){
-					e.origin_x = SOURCE_X;
-					e.origin_y = SOURCE_Y;
+					e1->origin_x = SOURCE_X;
+					e1->origin_y = SOURCE_Y;
 
-					e.dest_x = i;
-					e.dest_y = j;
+					e1->dest_x = i;
+					e1->dest_y = j;
 
-					e.flux = tmp;
-					e.cap_res = tmp_P_values[i * columns + j] - tmp;
+					e1->flux = tmp;
+					e1->cap_res = tmp_P_values[i * columns + j] - tmp;
 
-					source.edges = push(&e, source.edges);
+					source.edges = push(e1, source.edges);
 				}
-				else if(tmp > tmp_P_values[i * columns + j]){
-					e.origin_x = i;
-					e.origin_y = j;
+				else{
+					e1->origin_x = i;
+					e1->origin_y = j;
 
-					e.dest_x = SINK_X;
-					e.dest_y = SINK_Y;
+					e1->dest_x = SINK_X;
+					e1->dest_y = SINK_Y;
 
-					e.flux = tmp_P_values[i * columns + j];
-					e.cap_res = tmp - tmp_P_values[i * columns + j];
+					e1->flux = tmp_P_values[i * columns + j];
+					e1->cap_res = tmp - tmp_P_values[i * columns + j];
 
-					sink.edges = push(&e, sink.edges);
+					sink.edges = push(e1, sink.edges);
 				}
 
-				graph[i * columns + j].edges = push(&e, graph[i * columns + j].edges);
+				graph[i * columns + j].edges = push(e1, graph[i * columns + j].edges);
 
-				flow += e.flux;
+				flow += e1->flux;
 			}
 			else{
 				flow += tmp;
@@ -140,39 +144,38 @@ int main(){
 			scanf("%d ", &tmp);
 
 			if(tmp != 0){
-				EDGE e1, e2;
+				e1 = (EDGE*)malloc(sizeof(EDGE));
+				e2 = (EDGE*)malloc(sizeof(EDGE));
 
-				e1.origin_x = i;
-				e1.origin_y = j;
+				e1->origin_x = i;
+				e1->origin_y = j;
 
-				e1.dest_x = i;
-				e1.dest_y = j + 1;
+				e1->dest_x = i;
+				e1->dest_y = j + 1;
 
-				e1.flux = 0;
-				e1.cap_res = tmp;
+				e1->flux = 0;
+				e1->cap_res = tmp;
 
 
-				e2.origin_x = i;
-				e2.origin_y = j + 1;
+				e2->origin_x = i;
+				e2->origin_y = j + 1;
 
-				e2.dest_x = i;
-				e2.dest_y = j;
+				e2->dest_x = i;
+				e2->dest_y = j;
 
-				e2.flux = 0;
-				e2.cap_res = tmp;
+				e2->flux = 0;
+				e2->cap_res = tmp;
 
-				graph[i * columns + j].edges = push(&e1, graph[i * columns + j].edges);
-				graph[i * columns + j].edges = push(&e2, graph[i * columns + j].edges);
+				graph[i * columns + j].edges = push(e1, graph[i * columns + j].edges);
+				graph[i * columns + j].edges = push(e2, graph[i * columns + j].edges);
 
-				graph[i * columns + j + 1].edges = push(&e1, graph[i * columns + j + 1].edges);
-				graph[i * columns + j + 1].edges = push(&e2, graph[i * columns + j + 1].edges);
+				graph[i * columns + j + 1].edges = push(e1, graph[i * columns + j + 1].edges);
+				graph[i * columns + j + 1].edges = push(e2, graph[i * columns + j + 1].edges);
 			}
 		}
 
 		scanf("\n");
 	}
-	
-	printf("\n");
 
 
 	for(i = 0; i < lines - 1; i++){
@@ -180,32 +183,33 @@ int main(){
 			scanf("%d ", &tmp);
 
 			if(tmp != 0){
-				EDGE e1, e2;
+				e1 = (EDGE*)malloc(sizeof(EDGE));
+				e2 = (EDGE*)malloc(sizeof(EDGE));
 
-				e1.origin_x = i;
-				e1.origin_y = j;
+				e1->origin_x = i;
+				e1->origin_y = j;
 
-				e1.dest_x = i + 1;
-				e1.dest_y = j;
+				e1->dest_x = i + 1;
+				e1->dest_y = j;
 
-				e1.flux = 0;
-				e1.cap_res = tmp;
+				e1->flux = 0;
+				e1->cap_res = tmp;
 
 
-				e2.origin_x = i + 1;
-				e2.origin_y = j;
+				e2->origin_x = i + 1;
+				e2->origin_y = j;
 
-				e2.dest_x = i;
-				e2.dest_y = j;
+				e2->dest_x = i;
+				e2->dest_y = j;
 
-				e2.flux = 0;
-				e2.cap_res = tmp;
+				e2->flux = 0;
+				e2->cap_res = tmp;
 
-				graph[i * columns + j].edges = push(&e1, graph[i * columns + j].edges);
-				graph[i * columns + j].edges = push(&e2, graph[i * columns + j].edges);
+				graph[i * columns + j].edges = push(e1, graph[i * columns + j].edges);
+				graph[i * columns + j].edges = push(e2, graph[i * columns + j].edges);
 
-				graph[(i + 1) * columns + j].edges = push(&e1, graph[(i + 1) * columns + j].edges);
-				graph[(i + 1) * columns + j].edges = push(&e2, graph[(i + 1) * columns + j].edges);
+				graph[(i + 1) * columns + j].edges = push(e1, graph[(i + 1) * columns + j].edges);
+				graph[(i + 1) * columns + j].edges = push(e2, graph[(i + 1) * columns + j].edges);
 			}
 		}
 
@@ -233,9 +237,9 @@ int main(){
 
 void edmondsKarp(){
 	EDGE *e;
-	STACK *s, *tmp;
+	STACK *s = NULL, *tmp = NULL;
 	VERTEX *u;
-	int minCapRes;
+	int minCapRes = 0;
 	int cur_x, cur_y;
 
 
@@ -243,7 +247,7 @@ void edmondsKarp(){
 
 		e = sink.pred;
 
-		u = &graph[e->origin_x * lines + e->origin_y];
+		u = &graph[e->origin_x * columns + e->origin_y];
 
 		cur_x = e->origin_x;
 		cur_y = e->origin_y;
@@ -253,6 +257,7 @@ void edmondsKarp(){
 		s = push(e, s);
 
 		e = u->pred;
+
 		s = push(e, s);
 
 		while(e->origin_x != SOURCE_X){
@@ -263,7 +268,7 @@ void edmondsKarp(){
 					minCapRes = e->cap_res;
 				}
 
-				u = &graph[e->origin_x * lines + e->origin_y];
+				u = &graph[e->origin_x * columns + e->origin_y];
 
 				cur_x = e->origin_x;
 				cur_y = e->origin_y;
@@ -274,16 +279,18 @@ void edmondsKarp(){
 					minCapRes = e->flux;
 				}
 
-				u = &graph[e->dest_x * lines + e->dest_y];
+				u = &graph[e->dest_x * columns + e->dest_y];
 
 				cur_x = e->dest_x;
 				cur_y = e->dest_y;
 			}
 
+			u = &graph[cur_x * columns + cur_y];
+
 			e = u->pred;
+
 			s = push(e, s);
 		}
-
 
 		e = s->edge;
 
@@ -292,6 +299,8 @@ void edmondsKarp(){
 
 		cur_x = e->dest_x;
 		cur_y = e->dest_y;
+
+		flow += minCapRes;
 
 		tmp = s;
 		s = s->next;
@@ -318,8 +327,8 @@ void edmondsKarp(){
 				cur_x = e->origin_x;
 				cur_y = e->origin_y;
 			}
-			
-			flow += minCapRes;
+
+
 
 			tmp = s;
 			s = s->next;
@@ -339,7 +348,7 @@ void edmondsKarp(){
 int bfs(){
 	bfs_count++;
 
-	int *q = (int*)malloc(sizeof(int));
+	int *q = (int*)malloc(sizeof(int) * (lines * columns + 2));
 
 	int beg = 0, end = 0;
 
@@ -369,37 +378,43 @@ int bfs(){
 
 			e = s->edge;
 
-			printf("%d:  %d %d -> %d %d\n", q[beg], e->origin_x, e->origin_y, e->dest_x, e->dest_y);
-			fflush(stdout);
-
 			if(e->dest_x == SINK_X){
+				if(e->cap_res > 0){
+					sink.pred = e;
 
-				sink.pred = e;
+					sink.bfs_count = bfs_count;
 
-				free(q);
+					free(q);
 
-				return 1;
+					return 1;
+				}
+				else{
+					s = s->next;
+
+					continue;
+				}
 			}
 
-			if(e->origin_x == (int)(q[beg] / columns) && e->origin_y == (int)(q[beg] / columns)){
+			if(e->origin_x == SOURCE_X || (e->origin_x == (int)(q[beg] / columns) && e->origin_y == (q[beg] % columns))){
+		
+				v = &graph[e->dest_x * columns + e->dest_y];
 
 				/* Forwards */
 				if(v->bfs_count != bfs_count && e->cap_res > 0){
 
-					v = &graph[e->dest_x * columns + e->dest_y];
-
 					q[end++] = e->dest_x * columns + e->dest_y;
-	
+
 					v->bfs_count = bfs_count;
+
 					v->pred = e;
 				}
 			}
-			else if(e->origin_x != SOURCE_X){
+			else{
+
+				v = &graph[e->origin_x * columns + e->origin_y];
 
 				/* Backwards */
 				if(v->bfs_count != bfs_count && e->flux > 0){
-
-					v = &graph[e->origin_x * columns + e->origin_y];
 
 					q[end++] = e->origin_x * columns + e->origin_y;
 
@@ -407,6 +422,7 @@ int bfs(){
 					v->pred = e;
 				}
 			}
+			
 
 			s = s->next;
 		}
