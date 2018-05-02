@@ -248,8 +248,6 @@ void edmondsKarp(){
 
 		e = sink.pred;
 
-		u = &graph[e->origin_x * columns + e->origin_y];
-
 		cur_x = e->origin_x;
 		cur_y = e->origin_y;
 
@@ -257,19 +255,19 @@ void edmondsKarp(){
 
 		s = push(e, s);
 
-		e = u->pred;
+		do {
 
-		s = push(e, s);
+			u = &graph[cur_x * columns + cur_y];
 
-		while(e->origin_x != SOURCE_X){
+			e = u->pred;
+
+			s = push(e, s);
 
 			/* go to origin */
 			if(e->dest_x == cur_x && e->dest_y == cur_y){
 				if(e->cap_res < minCapRes){
 					minCapRes = e->cap_res;
 				}
-
-				u = &graph[e->origin_x * columns + e->origin_y];
 
 				cur_x = e->origin_x;
 				cur_y = e->origin_y;
@@ -280,18 +278,11 @@ void edmondsKarp(){
 					minCapRes = e->flux;
 				}
 
-				u = &graph[e->dest_x * columns + e->dest_y];
-
 				cur_x = e->dest_x;
 				cur_y = e->dest_y;
 			}
 
-			u = &graph[cur_x * columns + cur_y];
-
-			e = u->pred;
-
-			s = push(e, s);
-		}
+		} while(cur_x != SOURCE_X);
 
 		e = s->edge;
 
@@ -302,7 +293,7 @@ void edmondsKarp(){
 		cur_y = e->dest_y;
 
 		flow += minCapRes;
-
+		
 		tmp = s;
 		s = s->next;
 		free(tmp);
