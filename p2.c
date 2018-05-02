@@ -58,7 +58,8 @@ VERTEX *graph;
 int main(){
 	
 	int i, j, tmp;
-	EDGE *e1, *e2;
+	EDGE *e1;
+	EDGE *e2;
 
 	scanf("%d %d\n", &lines, &columns);
 
