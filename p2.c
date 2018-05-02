@@ -82,7 +82,7 @@ int main(){
 
 	sink.pred = NULL;
 	sink.edges = NULL;
-	source.bfs_count = 0;
+	sink.bfs_count = 0;
 
 
 	for(i = 0; i < lines; i++){
@@ -329,8 +329,6 @@ void edmondsKarp(){
 				cur_y = e->origin_y;
 			}
 
-
-
 			tmp = s;
 			s = s->next;
 			free(tmp);
@@ -397,7 +395,7 @@ int bfs(){
 			}
 
 			if(e->origin_x == SOURCE_X || (e->origin_x == (int)(q[beg] / columns) && e->origin_y == (q[beg] % columns))){
-		
+			
 				v = &graph[e->dest_x * columns + e->dest_y];
 
 				/* Forwards */
@@ -474,6 +472,7 @@ void printColors(){
 				printf("%c ", 'C');
 			}
 		}
+		
 		printf("\n");
 	}
 }
